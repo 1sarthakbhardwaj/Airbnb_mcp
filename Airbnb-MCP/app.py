@@ -14,14 +14,12 @@ from camel.types import ModelPlatformType, ModelType
 # ——— Page config ———
 st.set_page_config(page_title="Airbnb Listings Search", layout="wide")
 
-# ——— Locate assets folder (two levels up) ———
-ROOT = Path(__file__).resolve().parents[2]    # <— this points to “.../owl”
-ASSETS = ROOT / "assets"
+
 
 # ——— Load & encode logos ———
-with open(ASSETS / "logo_camel_ai.png", "rb") as f:
+with open(assets/"logo_camel_ai.png", "rb") as f:
     camel_bytes = f.read()
-with open(ASSETS / "logo_airbnb_mcp.png", "rb") as f:
+with open(assets/"logo_airbnb_mcp.png", "rb") as f:
     airbnb_bytes = f.read()
 
 camel_b64   = base64.b64encode(camel_bytes).decode()

@@ -1,103 +1,129 @@
+# 🏡 Airbnb Listings Search (Streamlit + CAMEL-AI + MCP)
 
-# 🏡 CAMEL-AI + MCP: Airbnb Use Case
-
-This example demonstrates how to use the [CAMEL-AI OWL framework](https://github.com/camel-ai/owl) and **MCP (Model Context Protocol)** to search for Airbnb listings using a custom MCP server (`@openbnb/mcp-server-airbnb`). Agents in the OWL framework coordinate to perform tool-augmented travel research in a structured, automated way.
-
----
-
-## ✨ Use Case
-
-> _“Find me the best Airbnb in Gurugram with a check-in date of 2025-06-01 and a check-out date of 2025-06-07 for 2 adults. Return the top 5 listings with their names, prices, and locations.”_
-
-Agents leverage an MCP server to execute real-time Airbnb queries and return formatted results.
+A Streamlit app that leverages the [CAMEL-AI OWL framework](https://github.com/camel-ai/owl) and **MCP (Model Context Protocol)** to automatically search Airbnb listings via a custom MCP server. The app displays search parameters and returns the top 5 listings in a clean, responsive card-grid UI.
 
 ---
 
-## 📦 Setup
+## ✨ Features
 
-### 1. Clone and install dependencies
+- **Interactive UI**: Sidebar for entering city, check-in/out dates and number of adults.
+- **Session state**: Remembers your last chosen dates.
+- **Agent-driven search**: Uses a CAMEL-AI `ChatAgent` + MCPToolkit to query Airbnb via `@openbnb/mcp-server-airbnb`.
+- **Responsive cards**: Displays each listing in its own styled card.
+![Airbnb Listings Search UI](assets/screenshot.png)
+---
+
+## 📋 Prerequisites
+
+- Python 3.8+
+- Node.js & npm (for the MCP server plugin)
+- A valid OpenAI API key set in your environment:
+  ```bash
+  export OPENAI_API_KEY="your_api_key_here"
+  ```
+
+---
+
+## 🛠️ Setup
+
+1. **Clone the repo**
+
+   ```bash
+   git clone https://github.com/your-org/your-repo.git
+   cd your-repo/owl/community_usecase/Airbnb-MCP
+   ```
+
+2. **Create a virtual environment**
+
+   ```bash
+   python -m venv venv
+   source venv/bin/activate      # macOS/Linux
+   venv\\Scripts\\activate     # Windows
+   ```
+
+3. **Install Python dependencies**
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Install the Airbnb MCP server**
+
+   ```bash
+   npm install -g @openbnb/mcp-server-airbnb
+   ```
+
+---
+
+## ⚙️ Configuration
+
+1. **Environment variables**  
+   Create a `.env` file in the project root with:
+   ```ini
+   OPENAI_API_KEY=your_openai_key_here
+   ```
+
+2. **MCP Server config**  
+   Ensure `mcp_servers_config.json` (next to `app.py`) contains:
+   ```json
+   {
+     "mcpServers": {
+       "airbnb": {
+         "command": "npx",
+         "args": ["-y", "@openbnb/mcp-server-airbnb", "--ignore-robots-txt"]
+       }
+     }
+   }
+   ```
+
+3. **Logos**  
+   Place your two PNGs in `assets/` at the project root:
+   - `logo_camel_ai.png`
+   - `logo_airbnb_mcp.png`
+
+---
+
+## 🚀 Running the App
+
+From the `Airbnb-MCP` folder, run:
 
 ```bash
-git clone https://github.com/camel-ai/owl
-cd owl
-pip install -r requirements.txt
+streamlit run app.py
+```
+
+This will launch the Streamlit UI in your browser. Use the sidebar to choose your city, dates and number of guests, then click **Search Listings**.
+
+---
+
+## 🔧 Customization
+
+- **Prompt**: Edit the search prompt inside `app.py` if you want to tweak wording or number of results.
+- **Styling**: Modify the CSS in the header section of `app.py` to change colors, fonts or card layout.
+- **Logging**: Change `set_log_level("DEBUG")` to `INFO` in production.
+
+---
+
+## 📂 Project Structure
+
+```
+Airbnb-MCP/
+├── assets/
+│   ├── logo_camel_ai.png
+│   └── logo_airbnb_mcp.png
+├── mcp_servers_config.json
+├── app.py              # Main Streamlit application
+├── requirements.txt    # Python deps
+└── .env                # Env file with OPENAI_API_KEY
 ```
 
 ---
 
-### 2. Configure MCP Server
+## 📚 References
 
-In your `mcp_servers_config.json`, add the following:
-
-```json
-{
-  "mcpServers": {
-    "airbnb": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@openbnb/mcp-server-airbnb",
-        "--ignore-robots-txt"
-      ]
-    }
-  }
-}
-```
-
-> 🛠️ You will need **Node.js and NPM** installed. Run `npx` will automatically fetch the Airbnb MCP server.
+- [CAMEL-AI OWL Framework](https://github.com/camel-ai/owl)
+- [Anthropic MCP Docs](https://docs.anthropic.com/en/docs/agents-and-tools/mcp)
+- [@openbnb/mcp-server-airbnb (npm)](https://www.npmjs.com/package/@openbnb/mcp-server-airbnb)
 
 ---
 
-### 3. Run the Example Script
-
-```bash
-python community_usecase/Airbnb_MCP
-```
-
-You can also customize the prompt inside the script itself. Edit the `default_task` section of `Airbnb_MCP.py` like this:
-
-```python
-# Replace this line:
-default_task = (
-    "here you need to add the task"
-)
-
-# Example:
-default_task = (
-    "Find me the best Airbnb in Gurugram with a check-in date of 2025-06-01 "
-    "and a check-out date of 2025-06-07 for 2 adults. Return the top 5 listings with their names, "
-    "prices, and locations."
-)
-```
-
-This allows agents to work from your hardcoded task without passing anything via command line.
-
----
-
-## 🧠 How It Works
-
-- **MCPToolkit** reads the config and connects to the `@openbnb/mcp-server-airbnb`.
-- **OWL RolePlaying Agents** simulate a conversation between a `content_curator` and a `research_assistant`.
-- The **assistant agent** calls the MCP Airbnb server to fetch listings.
-- The results are processed, formatted, and printed.
-
----
-
----
-
-## 🚧 Notes
-
-- This script uses **GPT-4o** via OpenAI for both user and assistant roles.
-- Supports async execution and graceful cleanup of agents and MCP sessions.
-- Add retries and fallback logic for production use.
-
----
-
-## 📌 References
-
-- [MCP Overview (Anthropic)](https://docs.anthropic.com/en/docs/agents-and-tools/mcp)
-- [CAMEL-AI GitHub](https://github.com/camel-ai/camel)
-- [OWL Framework](https://github.com/camel-ai/owl)
-- [MCP Airbnb Plugin](https://www.npmjs.com/package/@openbnb/mcp-server-airbnb)
-~~~
-
+*Happy listing searches!*
